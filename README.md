@@ -7,7 +7,7 @@ To run this project you need to follow the following steps:
 make
 
 **[2]** Then run the following line:
-sudo insmod buzzerdriver.ko
+sudo insmod Imperial_March_Driver.ko
 
 **[3]** And finally:
 echo 1 > /dev/etx_device
