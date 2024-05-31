@@ -107,29 +107,36 @@ static ssize_t etx_read(struct file *filp,
 /*
 ** This function will be called when we write the Device file
 */ 
-static ssize_t etx_write(struct file *filp, 
-                const char __user *buf, size_t len, loff_t *off)
+static ssize_t etx_write(struct file *filp, const char __user *buf, size_t len, loff_t *off)
 {
-  uint8_t rec_buf[10] = {0};
+    uint8_t rec_buf[10] = {0};
+    int i,j,duration;
   
-  if( copy_from_user( rec_buf, buf, len ) > 0) {
-    pr_err("ERROR: Not all the bytes have been copied from user\n");
-    return -EFAULT;
-  }
-
-  if (rec_buf[0] == '1') {
-    for (int i = 0; i < sizeof(imperial_march_melody)/sizeof(imperial_march_melody[0]); i++) {
-      gpio_set_value(GPIO_21, 1);
-      udelay(imperial_march_beat[i] * 1000);
-      gpio_set_value(GPIO_21, 0);
-      udelay(imperial_march_beat[i] * 1000);
+    if (copy_from_user(rec_buf, buf, len) > 0) {
+        pr_err("ERROR: Not all the bytes have been copied from user\n");
+        return -EFAULT;
     }
-  } else {
-    pr_err("Unknown command: Please provide '1' to play the Imperial March.\n");
-    return -EINVAL;
-  }
-  
-  return len;
+
+if (rec_buf[0] == '1') {
+    pr_err("en el if\n");
+        for (i = 0; i < sizeof(imperial_march_melody) / sizeof(imperial_march_melody[0]); i++) {
+          pr_err("en el for1\n");
+            duration = 1000 / (imperial_march_beat[i]); // calculate note duration
+            for (j = 0; j < imperial_march_melody[i]; j++) {
+                pr_err("en el for2\n");
+                gpio_set_value(GPIO_21, 1);
+                udelay(duration);  // delay for half the period of the tone
+                gpio_set_value(GPIO_21, 0);
+                udelay(duration);  // delay for half the period of the tone
+            }
+            mdelay(50);
+    }
+    } else {
+        pr_err("Unknown command: Please provide '1' to play the Imperial March.\n");
+        return -EINVAL;
+    }
+
+    return len;
 }
 
 /*
@@ -223,3 +230,4 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("GRUPO_OPERATIVOS");
 MODULE_DESCRIPTION("A simple device driver - GPIO Driver");
 MODULE_VERSION("1.32");
+
